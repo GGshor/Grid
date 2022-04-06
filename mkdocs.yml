@@ -1,0 +1,14 @@
+site_name: Grid
+site_url: https://ggshor.github.io/Grid
+repo_name: GGshor/Grid
+repo_url: https://github.com/GGshor/Grid
+
+theme:
+  icon:
+    logo: material/database
+    repo: fontawesome/brands/git-alt
+  name: material
+  favicon: images/favicon.png
+  palette:
+    primary: "blue"
+    accent: "blue grey"
