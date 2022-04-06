@@ -15,3 +15,16 @@ For full documentation visit [mkdocs.org](https://www.mkdocs.org).
     docs/
         index.md  # The documentation homepage.
         ...       # Other markdown pages, images and other files.
+
+## Test
+:::danger Danger!!
+Very dangerous~
+:::
+
+:::warning Heads up!
+Just wanted to warn you about the next one.
+:::
+
+```lua
+print("Lua text!")
+```
