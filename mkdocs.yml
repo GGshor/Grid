@@ -20,6 +20,3 @@ theme:
       toggle:
         icon: material/weather-sunny
         name: Switch to light mode
-
-extra_css:
-  - stylesheets/extra.css
