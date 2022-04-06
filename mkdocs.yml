@@ -10,5 +10,5 @@ theme:
   name: material
   favicon: images/favicon.png
   palette:
-    primary: "grey"
+    primary: "black"
     accent: "black"
