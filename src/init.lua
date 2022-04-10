@@ -137,7 +137,9 @@ local function GetCommunications()
 	if IsServer == true then
 		-- Stops duplicates and destroys them
 		if ReplicatedStorage:FindFirstChild("GridCommunications") and createdCommunications == false then
-			ReplicatedStorage.Communication:Destroy()
+			ReplicatedStorage.GridCommunications:Destroy()
+		elseif createdCommunications == false then
+			return  ReplicatedStorage.GridCommunications
 		end
 		createdCommunications = true
 
