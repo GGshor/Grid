@@ -17,11 +17,11 @@ For full documentation visit [mkdocs.org](https://www.mkdocs.org).
         ...       # Other markdown pages, images and other files.
 
 ## Test
-:::danger Danger!!
+!!! danger Danger!
 Very dangerous~
 :::
 
-:::warning Heads up!
+!!! warning Heads up!
 Just wanted to warn you about the next one.
 :::
 
