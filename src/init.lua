@@ -139,7 +139,7 @@ local function GetCommunications()
 		if ReplicatedStorage:FindFirstChild("GridCommunications") and createdCommunications == false then
 			ReplicatedStorage.GridCommunications:Destroy()
 		elseif createdCommunications == true then
-			return  ReplicatedStorage.GridCommunications
+			return ReplicatedStorage.GridCommunications
 		end
 		createdCommunications = true
 
@@ -157,6 +157,8 @@ local function GetCommunications()
 		FunctionsFolder.Parent = CommunicationFolder
 		EventsFolder.Parent = CommunicationFolder
 		BindsFolder.Parent = CommunicationFolder
+
+		debugPrint("Created communications folders")
 
 		return {
 			["Functions"] = FunctionsFolder,
@@ -910,9 +912,15 @@ if IsServer == true then
 		if loggingGrid then return end
 		output("Logging Grid Traffic...")
 
-		loggingGrid = setmetatable({}, { __index = function(t, i)
-			t[i] = setmetatable({}, { __index = function(t, i) t[i] = { dataIn = {}, dataOut = {} } return t[i] end })
-			return t[i]
+		loggingGrid = setmetatable({}, {
+			__index = function(logTable, index)
+				logTable[index] = setmetatable({}, {
+					__index = function(inLog, new)
+						inLog[new] = { dataIn = {}, dataOut = {} }
+					return inLog[new]
+				end
+			})
+			return logTable[index]
 		end})
 
 		local start = os.clock()
@@ -965,9 +973,10 @@ if IsServer == true then
 
 else
 	local communications = GetCommunications()
-	communications.Binds.ChildAdded:Connect(function(child)
-		print("Do binds stuff")
-	end)
+	-- TODO: Add binds support
+	-- communications.Binds.ChildAdded:Connect(function(child)
+	-- 	print("Do binds stuff")
+	-- end)
 
 	communications.Events.ChildAdded:Connect(function(child)
 		GetEventHandler(child.Name)
@@ -1045,8 +1054,16 @@ end
 --[[ Value packing extension ]]--
 
 do
-	local SendingCache = setmetatable({}, { __index = function(t, i) t[i] = {} return t[i] end, __mode = "k" })
-	local ReceivingCache = setmetatable({}, { __index = function(t, i) t[i] = {} return t[i] end, __mode = "k" })
+	local SendingCache = setmetatable({}, {
+		__index = function(t, i)
+			t[i] = {}
+		return t[i]
+	end, __mode = "k" })
+	local ReceivingCache = setmetatable({}, {
+		__index = function(t, i)
+			t[i] = {}
+			return t[i]
+		end, __mode = "k" })
 	local MaxStringLength = 64
 	local CacheSize = 32 -- must be under 256, keeping it low because adding a new entry goes through the entire cache
 
@@ -1094,7 +1111,7 @@ do
 				cache[index] = info
 				cache[value] = info
 			else
-				for i,other in ipairs(cache) do
+				for _,other in ipairs(cache) do
 					if not info or other.last < info.last then
 						info = other
 					end
@@ -1320,7 +1337,7 @@ do
 		assert(ReferenceTypes[referenceType], "Invalid Reference Type " .. tostring(referenceType))
 
 		local last = Objects[referenceType]
-		for i,v in ipairs(objects) do
+		for _,v in ipairs(objects) do
 			last = last[v]
 
 			if not last then
