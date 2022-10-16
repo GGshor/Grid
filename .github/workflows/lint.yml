@@ -1,0 +1,20 @@
+name: selene
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    name: Setup selene
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: ok-nick/setup-aftman@v0.3.0
+      with:
+          token: ${{ SECRETS.GITHUB_TOKEN }}
+
+    - name: Selene check
+      run: |
+        selene ./src
