@@ -46,12 +46,10 @@
 	  because it is not possible to both instantly detect errors and have them be logged in the output with full stacktraces.
 ]]
 
-
 --// Services
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
-
 
 --// Constants
 local Grid = {}
@@ -61,27 +59,25 @@ local IsServer = RunService:IsServer()
 local IsClient = RunService:IsClient()
 local YieldBindable = Instance.new("BindableEvent")
 
-
 --// Variables
 local loggingGrid: {} = nil
 local createdCommunications = false
 local handlers = {
 	Events = {},
 	Functions = {},
-	Deferred = {}
+	Deferred = {},
 }
 local counters = {
 	Received = 0,
-	Invoked = 0
+	Invoked = 0,
 }
-
 
 --// Local functions
 
 -- Gets all parameters from inserted arguments and transforms them into a single string.
 local function GetParamString(...: any): string
 	local packed = table.pack(...)
-	local minimum  = math.min(10, packed.n)
+	local minimum = math.min(10, packed.n)
 
 	for index = 1, minimum do
 		local value = packed[index]
@@ -89,20 +85,19 @@ local function GetParamString(...: any): string
 
 		if valueType == "string" then
 			packed[index] = string.format("%q[%d]", #value <= 18 and value or value:sub(1, 15) .. "...", #value)
-
 		elseif valueType == "Instance" then
 			local success, className = pcall(function()
 				return value.ClassName
 			end)
 
 			packed[index] = success and string.format("%s<%s>", valueType, className) or valueType
-
 		else
 			packed[index] = valueType
 		end
 	end
 
-	return table.concat(packed, ", ", 1, minimum ) .. (packed.n > minimum  and string.format(", ... (%d more)", packed.n - minimum ) or "")
+	return table.concat(packed, ", ", 1, minimum)
+		.. (packed.n > minimum and string.format(", ... (%d more)", packed.n - minimum) or "")
 end
 
 --[[
@@ -123,7 +118,7 @@ end
 	Throws an error without halting script
 ]]
 local function debugError(...)
-	for _, msg in pairs({...}) do
+	for _, msg in pairs({ ... }) do
 		task.spawn(error, "[GRID]: " .. tostring(msg), -1)
 	end
 end
@@ -163,9 +158,8 @@ local function GetCommunications()
 		return {
 			["Functions"] = FunctionsFolder,
 			["Events"] = EventsFolder,
-			["Binds"] = BindsFolder
+			["Binds"] = BindsFolder,
 		}
-
 	elseif IsClient == true then
 		local CommunicationFolder = ReplicatedStorage:WaitForChild("GridCommunications")
 		local FunctionsFolder = CommunicationFolder:WaitForChild("Functions")
@@ -175,11 +169,10 @@ local function GetCommunications()
 		return {
 			["Functions"] = FunctionsFolder,
 			["Events"] = EventsFolder,
-			["Binds"] = BindsFolder
+			["Binds"] = BindsFolder,
 		}
 	end
 end
-
 
 --// Functions
 
@@ -271,13 +264,9 @@ function SafeInvoke(timeout: number?, handler: table, ...: any): (boolean, ...an
 
 	task.spawn(function(...: any)
 		if IsServer == true then
-			result = table.pack(
-				pcall(handler.Remote.InvokeClient, handler.Remote, ...)
-			)
+			result = table.pack(pcall(handler.Remote.InvokeClient, handler.Remote, ...))
 		else
-			result = table.pack(
-				pcall(handler.Remote.InvokeServer, handler.Remote, ...)
-			)
+			result = table.pack(pcall(handler.Remote.InvokeServer, handler.Remote, ...))
 		end
 
 		if finished == false then
@@ -310,13 +299,13 @@ end
  	YIELDS
 ]]
 function SafeFireEvent(handler: table, ...: any)
-	local callbacks: {(...any) -> ()} = handler.Callbacks
+	local callbacks: { (...any) -> () } = handler.Callbacks
 	local index = #callbacks
 
 	while index > 0 do
 		local running = true
 
-		task.spawn(function(...:any)
+		task.spawn(function(...: any)
 			while running == true and index > 0 do
 				local callback = callbacks[index]
 				index -= 1
@@ -328,7 +317,6 @@ function SafeFireEvent(handler: table, ...: any)
 		running = false
 	end
 end
-
 
 --[[
 	Waits for the child with infinite yield.
@@ -375,7 +363,7 @@ function GetEventHandler(name: string): {}
 		Folder = GetCommunications().Events,
 
 		Callbacks = {},
-		IncomingQueueErrored = false
+		IncomingQueueErrored = false,
 	}
 
 	handlers.Events[name] = handler
@@ -455,7 +443,7 @@ function GetFunctionHandler(name: string): {}
 		Folder = GetCommunications().Functions,
 
 		Callback = nil,
-		IncomingQueueErrored = nil
+		IncomingQueueErrored = nil,
 	}
 
 	handlers.Functions[name] = handler
@@ -466,7 +454,6 @@ function GetFunctionHandler(name: string): {}
 		remote.Parent = handler.Folder
 
 		handler.Remote = remote
-
 	else
 		task.spawn(function()
 			handler.Queue = {}
@@ -480,7 +467,7 @@ function GetFunctionHandler(name: string): {}
 					if #handler.IncomingQueue >= 2048 then
 						if not handler.IncomingQueueErrored then
 							handler.IncomingQueueErrored = true
-							
+
 							debugError(("Exhausted remote invocation queue for &s"):format(remote:GetFullName()))
 
 							task.delay(1, function()
@@ -533,7 +520,14 @@ function AddToQueue(handler: table, callback: () -> (), shouldOutput: boolean)
 	if shouldOutput == true then
 		task.delay(5, function()
 			if not handler.Remote then
-				debugWarn(debug.traceback(("Infinite yield possible on '%s:WaitForChild(\"%s\")'"):format(handler.Folder:GetFullName(), handler.Name)))
+				debugWarn(
+					debug.traceback(
+						("Infinite yield possible on '%s:WaitForChild(\"%s\")'"):format(
+							handler.Folder:GetFullName(),
+							handler.Name
+						)
+					)
+				)
 			end
 		end)
 	end
@@ -611,7 +605,13 @@ local Middleware = {
 
 			if params.n > #paramTypes then
 				if IsStudio == true then
-					debugWarn(("Invalid number of parameters to %s"):format(event, #paramTypes - paramStart + 1, params.n - paramStart + 1))
+					debugWarn(
+						("Invalid number of parameters to %s"):format(
+							event,
+							#paramTypes - paramStart + 1,
+							params.n - paramStart + 1
+						)
+					)
 				end
 				return
 			end
@@ -622,7 +622,14 @@ local Middleware = {
 
 				if not argExpected[argType:lower()] and not argExpected.any then
 					if IsStudio then
-						debugWarn(("Invalid parameter %d to %s (%s expected, got %s)"):format(i - paramStart + 1, event, argExpected._string, argType))
+						debugWarn(
+							("Invalid parameter %d to %s (%s expected, got %s)"):format(
+								i - paramStart + 1,
+								event,
+								argExpected._string,
+								argType
+							)
+						)
 					end
 					return
 				end
@@ -632,13 +639,13 @@ local Middleware = {
 		end
 
 		return MatchParams
-	end
+	end,
 }
 
 --[[
 	Combines handler with a callback and logs it if logging exists
 ]]
-function combineFunctions(handler, finalCallback: {()-> ()}|() -> (), ...:any?)
+function combineFunctions(handler, finalCallback: { () -> () } | () -> (), ...: any?)
 	local middleware = { ... }
 
 	if typeof(finalCallback) == "table" then
@@ -667,11 +674,9 @@ function combineFunctions(handler, finalCallback: {()-> ()}|() -> (), ...:any?)
 			currentIndex += 1
 
 			if index <= #middleware then
-				return middleware[index](
-					function(...)
-						return runMiddleware(index + 1, ...)
-					end, ...
-				)
+				return middleware[index](function(...)
+					return runMiddleware(index + 1, ...)
+				end, ...)
 			end
 
 			return finalCallback(...)
@@ -689,7 +694,7 @@ end
 
  	YIELDS
 ]]
-function Grid:BindEvents(pre: {[string]: () -> ()}?, callbacks: {[string]: () -> ()})
+function Grid:BindEvents(pre: { [string]: () -> () }?, callbacks: { [string]: () -> () })
 	if typeof(pre) == "table" then
 		pre, callbacks = nil, pre
 	end
@@ -721,7 +726,7 @@ end
 
  	YIELDS
 ]]
-function Grid:BindFunctions(pre: table?, callbacks: {[string]: () -> ()})
+function Grid:BindFunctions(pre: table?, callbacks: { [string]: () -> () })
 	if typeof(pre) == "table" then
 		pre, callbacks = nil, pre
 	end
@@ -733,7 +738,11 @@ function Grid:BindFunctions(pre: table?, callbacks: {[string]: () -> ()})
 		end
 
 		if handler.Callback then
-			error(("[Grid]: Tried to bind multiple callbacks to the same RemoteFunction (%s)"):format(handler.Remote:GetFullName()))
+			error(
+				("[Grid]: Tried to bind multiple callbacks to the same RemoteFunction (%s)"):format(
+					handler.Remote:GetFullName()
+				)
+			)
 		end
 
 		handler.Callback = combineFunctions(handler, callback, pre)
@@ -752,8 +761,6 @@ function Grid:BindFunctions(pre: table?, callbacks: {[string]: () -> ()})
 	ExecuteDeferredHandlers()
 end
 
-
-
 if IsServer == true then
 	function HandlerFireClient(handler, client, ...)
 		if loggingGrid then
@@ -766,7 +773,7 @@ if IsServer == true then
 	--[[
 		Returns all players
 	]]
-	function Grid:GetPlayers(): {Player}
+	function Grid:GetPlayers(): { Player }
 		return Players:GetPlayers()
 	end
 
@@ -774,7 +781,8 @@ if IsServer == true then
 		Returns player's position, can be nil
 	]]
 	function Grid:GetPlayerPosition(player: Player): Vector3?
-		return player and player.Character and player.Character.PrimaryPart and player.Character.PrimaryPart.Position or nil
+		return player and player.Character and player.Character.PrimaryPart and player.Character.PrimaryPart.Position
+			or nil
 	end
 
 	--[[
@@ -909,7 +917,9 @@ if IsServer == true then
 			end
 		end
 
-		if loggingGrid then return end
+		if loggingGrid then
+			return
+		end
 		output("Logging Grid Traffic...")
 
 		loggingGrid = setmetatable({}, {
@@ -917,11 +927,12 @@ if IsServer == true then
 				logTable[index] = setmetatable({}, {
 					__index = function(inLog, new)
 						inLog[new] = { dataIn = {}, dataOut = {} }
-					return inLog[new]
-				end
-			})
-			return logTable[index]
-		end})
+						return inLog[new]
+					end,
+				})
+				return logTable[index]
+			end,
+		})
 
 		local start = os.clock()
 		task.wait(duration)
@@ -941,7 +952,7 @@ if IsServer == true then
 
 			output(string.format("Player '%s', total received/sent: %d/%d", player.Name, totalReceived, totalSent))
 
-			for remote,data in pairs(remotes) do
+			for remote, data in pairs(remotes) do
 				-- Incoming
 
 				local listIn = data.dataIn
@@ -959,7 +970,9 @@ if IsServer == true then
 
 				local listOut = data.dataOut
 				if #listOut > 0 then
-					output(string.format("   %s %s: %d (%.2f/s)", "FireClient", remote.Name, #listOut, #listOut / effDur))
+					output(
+						string.format("   %s %s: %d (%.2f/s)", "FireClient", remote.Name, #listOut, #listOut / effDur)
+					)
 
 					local count = math.min(#listOut, 3)
 					for i = 1, count do
@@ -970,7 +983,6 @@ if IsServer == true then
 			end
 		end
 	end
-
 else
 	local communications = GetCommunications()
 	-- TODO: Add binds support
@@ -981,14 +993,14 @@ else
 	communications.Events.ChildAdded:Connect(function(child)
 		GetEventHandler(child.Name)
 	end)
-	for _,child in pairs(communications.Events:GetChildren()) do
+	for _, child in pairs(communications.Events:GetChildren()) do
 		GetEventHandler(child.Name)
 	end
 
 	communications.Functions.ChildAdded:Connect(function(child)
 		GetFunctionHandler(child.Name)
 	end)
-	for _,child in ipairs(communications.Functions:GetChildren()) do
+	for _, child in ipairs(communications.Functions:GetChildren()) do
 		GetFunctionHandler(child.Name)
 	end
 
@@ -1050,20 +1062,24 @@ else
 	end
 end
 
-
---[[ Value packing extension ]]--
+--[[ Value packing extension ]]
+--
 
 do
 	local SendingCache = setmetatable({}, {
 		__index = function(t, i)
 			t[i] = {}
-		return t[i]
-	end, __mode = "k" })
+			return t[i]
+		end,
+		__mode = "k",
+	})
 	local ReceivingCache = setmetatable({}, {
 		__index = function(t, i)
 			t[i] = {}
 			return t[i]
-		end, __mode = "k" })
+		end,
+		__mode = "k",
+	})
 	local MaxStringLength = 64
 	local CacheSize = 32 -- must be under 256, keeping it low because adding a new entry goes through the entire cache
 
@@ -1081,7 +1097,7 @@ do
 		["BrickColor"] = true,
 
 		["Udim2"] = true,
-		["Udim"] = true
+		["Udim"] = true,
 	}
 
 	--[[
@@ -1091,7 +1107,12 @@ do
 		local valueType = typeof(value)
 
 		if not ValidTypes[valueType] then
-			error(string.format("[Grid]: Invalid value passed to Grid:Pack (values of type %s are not supported)", valueType))
+			error(
+				string.format(
+					"[Grid]: Invalid value passed to Grid:Pack (values of type %s are not supported)",
+					valueType
+				)
+			)
 		end
 
 		if valueType == "boolean" or valueType == "nil" or value == "" then
@@ -1111,7 +1132,7 @@ do
 				cache[index] = info
 				cache[value] = info
 			else
-				for _,other in ipairs(cache) do
+				for _, other in ipairs(cache) do
 					if not info or other.last < info.last then
 						info = other
 					end
@@ -1153,7 +1174,6 @@ do
 	end
 
 	if IsServer == true then
-
 		--[[
 			Packs a value and adds it to the cache
 		]]
@@ -1187,7 +1207,7 @@ do
 				end
 
 				ReceivingCache[client][index] = value
-			end
+			end,
 		})
 	else
 		function Grid:Pack(value)
@@ -1201,17 +1221,18 @@ do
 		Grid:BindEvents({
 			SetPackedValue = function(char, value)
 				ReceivingCache.Server[string.byte(char)] = value
-			end
+			end,
 		})
 	end
 end
 
---[[ Reference extension ]]--
+--[[ Reference extension ]]
+--
 
 do
 	local ReferenceTypes = {
 		["Character"] = {},
-		["CharacterPart"] = {}
+		["CharacterPart"] = {},
 	}
 
 	local References = {}
@@ -1229,11 +1250,11 @@ do
 		local referenceInfo = ReferenceTypes[referenceType]
 		assert(referenceInfo, "Invalid Reference Type " .. tostring(referenceType))
 
- 		local referenceData = {
+		local referenceData = {
 			Type = referenceType,
 			Reference = key,
-			Objects = {...},
-			Aliases = {}
+			Objects = { ... },
+			Aliases = {},
 		}
 
 		References[referenceType][referenceData.Reference] = referenceData
@@ -1257,15 +1278,20 @@ do
 
 		local referenceData = References[referenceType][key]
 		if not referenceData then
-			debugWarn(("Tried to add an alias to a non-existing reference %s[%s]"):format(tostring(referenceType), tostring(key)))
+			debugWarn(
+				("Tried to add an alias to a non-existing reference %s[%s]"):format(
+					tostring(referenceType),
+					tostring(key)
+				)
+			)
 			return
 		end
 
-		local objects = {...}
+		local objects = { ... }
 		referenceData.Aliases[#referenceData.Aliases + 1] = objects
 
 		local last = Objects[referenceType]
-		for _,obj in ipairs(objects) do
+		for _, obj in ipairs(objects) do
 			local list = last[obj] or {}
 			last[obj] = list
 			last = list
@@ -1283,7 +1309,9 @@ do
 
 		local referenceData = References[referenceType][key]
 		if not referenceData then
-			debugWarn(("Tried to remove a non-existing reference %s[%s]"):format(tostring(referenceType), tostring(key)))
+			debugWarn(
+				("Tried to remove a non-existing reference %s[%s]"):format(tostring(referenceType), tostring(key))
+			)
 			return
 		end
 
@@ -1308,7 +1336,7 @@ do
 		local objects = Objects[referenceData.Type]
 		remove(objects, referenceData.Objects, 1)
 
-		for _,alias in ipairs(referenceData.Aliases) do
+		for _, alias in ipairs(referenceData.Aliases) do
 			remove(objects, alias, 1)
 		end
 	end
@@ -1331,13 +1359,13 @@ do
 		Gets reference from objects
 	]]
 	function Grid:GetReference(...): any?
-		local objects = {...}
+		local objects = { ... }
 
 		local referenceType = table.remove(objects)
 		assert(ReferenceTypes[referenceType], "Invalid Reference Type " .. tostring(referenceType))
 
 		local last = Objects[referenceType]
-		for _,v in ipairs(objects) do
+		for _, v in ipairs(objects) do
 			last = last[v]
 
 			if not last then
@@ -1349,7 +1377,5 @@ do
 		return refData and refData.Reference or nil
 	end
 end
-
-
 
 return Grid
