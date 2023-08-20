@@ -3,4 +3,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Grid = require(ReplicatedStorage.Grid)
 
 -- Do functions
-Grid:FireAllClients("Notification", "Test notification")
+while true do
+    Grid:FireAllClients("Notification", "TEST")
+
+    task.wait(1)
+end
