@@ -34,12 +34,12 @@
 
 	Notes:
 	- The first return value of InvokeClient (but not InvokeServer) is bool success, which is false if the invocation timed out
-	  or the handler errored.
+	or the handler errored.
 
 	- InvokeServer will error if it times out or the handler errors.
 
 	- InvokeServer/InvokeClient do not return instantly on an error, but instead check for failure every 0.5 seconds. This is
-	  because it is not possible to both instantly detect errors and have them be logged in the output with full stacktraces.
+	because it is not possible to both instantly detect errors and have them be logged in the output with full stacktraces.
 
 	- The license of this module can be found on the bottom.
 ]]
@@ -124,7 +124,7 @@ end
 --[[
 	Waits for communication folders to exist or creates them.
 
- 	YIELDS
+	YIELDS
 ]]
 local function GetCommunications()
 	if IsServer == true then
@@ -177,7 +177,7 @@ end
 --[[
 	Yields a thread.
 
- 	YIELDS
+	YIELDS
 ]]
 function YieldThread(): any?
 	-- needed a way to first call coroutine.yield(), and then call YieldBindable.Event:Wait()
@@ -201,7 +201,7 @@ end
 
 	Fail state is only checked every 0.5 seconds, so don't expect errors to return immediately
 
- 	YIELDS
+	YIELDS
 ]]
 function SafeInvokeCallback(handler: table, ...: any): ...any
 	local finished = false
@@ -253,7 +253,7 @@ end
 --[[
 	Safely invokes to a client with a possible timeout
 
- 	YIELDS
+	YIELDS
 ]]
 function SafeInvoke(timeout: number?, handler: table, ...: any): (boolean, ...any?)
 	local thread = coroutine.running()
@@ -294,7 +294,7 @@ end
 --[[
 	Goes through all callbacks in the handler and runs them with the given argument.
 
- 	YIELDS
+	YIELDS
 ]]
 function SafeFireEvent(handler: table, ...: any)
 	local callbacks: { (...any) -> () } = handler.Callbacks
@@ -321,7 +321,7 @@ end
 
 	Regular WaitForChild had issues with order (RemoteEvents were going through before WaitForChild resumed)
 
- 	YIELDS
+	YIELDS
 ]]
 function WaitForChild(parent: Instance, name: string): Instance
 	local found = parent:FindFirstChild(name)
@@ -347,7 +347,7 @@ end
 --[[
 	Searches for the event handler and makes one if it doesn't exists yet.
 
- 	YIELDS
+	YIELDS
 ]]
 function GetEventHandler(name: string): {}
 	-- Prevents creating the same handler
@@ -427,7 +427,7 @@ end
 --[[
 	Searches for the function handler and makes one if it doesn't exists yet.
 
- 	YIELDS
+	YIELDS
 ]]
 function GetFunctionHandler(name: string): {}
 	-- Prevents creating the same handler
@@ -506,7 +506,7 @@ end
 --[[
 	Searches for the event handler and makes one if it doesn't exists yet.
 
- 	YIELDS
+	YIELDS
 ]]
 function AddToQueue(handler: table, callback: () -> (), shouldOutput: boolean)
 	if handler.Remote then
@@ -534,7 +534,7 @@ end
 --[[
 	Runs all the deffered handlers.
 
- 	YIELDS
+	YIELDS
 ]]
 function ExecuteDeferredHandlers()
 	local oldHandlers = handlers.Deferred
@@ -690,7 +690,7 @@ end
 --[[
 	Binds callbacks to event
 
- 	YIELDS
+	YIELDS
 ]]
 function Grid:BindEvents(pre: { [string]: () -> () }?, callbacks: { [string]: () -> () })
 	if typeof(pre) == "table" then
@@ -722,7 +722,7 @@ end
 --[[
 	Binds callbacks to function
 
- 	YIELDS
+	YIELDS
 ]]
 function Grid:BindFunctions(pre: table?, callbacks: { [string]: () -> () })
 	if typeof(pre) == "table" then
@@ -873,7 +873,7 @@ if IsServer == true then
 	--[[
 		Invokes client with with a custom timeout, returns false if it failed.
 
-	 	YIELDS
+		YIELDS
 	]]
 	function Grid:InvokeClientWithTimeout(timeout: number, client: Player, event: string, ...): (boolean, any?)
 		local handler = GetEventHandler(event)
@@ -887,7 +887,7 @@ if IsServer == true then
 	--[[
 		Invokes client with a 60 seconds timeout
 
-	 	YIELDS
+		YIELDS
 	]]
 	function Grid:InvokeClient(client: Player, event: string)
 		return self:InvokeClientWithTimeout(60, client, event)
@@ -903,7 +903,7 @@ if IsServer == true then
 	--[[
 		Logs grid traffic with possible output
 
-	 	YIELDS
+		YIELDS
 	]]
 	function Grid:LogTrafficAsync(duration: number, shouldOutput: boolean)
 		--[[
@@ -1025,7 +1025,7 @@ else
 	--[[
 		Invoke server with custom timeout
 
-	 	YIELDS
+		YIELDS
 	]]
 	function Grid:InvokeServerWithTimeout(timeout: number, event: string, ...): ...any
 		local handler = GetFunctionHandler(event)
