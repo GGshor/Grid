@@ -1,8 +1,4 @@
 --[[
-	READ ME
-	This is a forked version of EasyNetwork, credits to the original creator:
-	https://devforum.roblox.com/t/-/571258
-
 	-- Server API
 
 	Grid:BindFunctions(functions)
@@ -40,10 +36,12 @@
 	- The first return value of InvokeClient (but not InvokeServer) is bool success, which is false if the invocation timed out
 	  or the handler errored.
 
-	- InvokeServer will error if it times out or the handler errors
+	- InvokeServer will error if it times out or the handler errors.
 
 	- InvokeServer/InvokeClient do not return instantly on an error, but instead check for failure every 0.5 seconds. This is
 	  because it is not possible to both instantly detect errors and have them be logged in the output with full stacktraces.
+
+	- The license of this module can be found on the bottom.
 ]]
 
 --// Services
