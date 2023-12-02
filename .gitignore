@@ -4,9 +4,3 @@
 # Roblox Studio lock files
 /*.rbxlx.lock
 /*.rbxl.lock
-
-# Python
-venv/
-
-# sourcemap
-./sourcemap.json
