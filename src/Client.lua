@@ -5,18 +5,26 @@
 local Types = require(script.Parent:WaitForChild("Types"))
 local Shared = require(script.Parent:WaitForChild("Shared"))
 
+--[=[
+	@class Client
+
+	@client
+]=]
 local Client = {}
 
 --[=[
 	Searches for the event handler and makes one if it doesn't exists yet.
 
-    @param handler Types.EventHandler -- The handler
-    @param callback () -> () -- The callback to add
-    @param shouldOutput boolean -- Should debug be enabled?
+	@param handler Types.EventHandler -- The handler
+	@param callback () -> () -- The callback to add
+	@param shouldOutput boolean -- Should debug be enabled?
 
-    @return any
+	@return any
 
 	@yields
+
+	@within Client
+	@ignore
 ]=]
 function AddToQueue(handler: Types.EventHandler, callback: () -> (), shouldOutput: boolean): any
 	if handler.Remote then

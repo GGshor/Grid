@@ -4,8 +4,14 @@
 
 local Players = game:GetService("Players")
 
-local Server = {}
 local Shared = require(script.Parent:WaitForChild("Shared"))
+
+--[=[
+	@class Server
+
+	@server
+]=]
+local Server = {}
 
 function HandlerFireClient(handler, client, ...)
 	if Shared.LoggingActive then

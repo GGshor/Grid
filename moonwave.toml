@@ -3,7 +3,11 @@ gitRepoUrl = "https://github.com/GGshor/Grid" # From Git
 
 gitSourceBranch = "main"
 changelog = true
-classOrder = []
+classOrder = [
+    "Server",
+    "Client",
+    "Shared"
+]
 
 [docusaurus]
 onBrokenLinks = "throw"
@@ -11,11 +15,4 @@ onBrokenMarkdownLinks = "warn"
 
 [footer]
 style = "dark"
-copyright = "Copyright © 2023 GGshor. Built with Moonwave and Docusaurus"
-
-[[footer.links]]
-title = "examples"
-
-[[footer.links.items]]
-label = "example"
-href = "https://example.com/"
+copyright = "Copyright © 2024 GGshor. Built with Moonwave and Docusaurus"

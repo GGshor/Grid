@@ -4,6 +4,9 @@ local RunService = game:GetService("RunService")
 
 local Types = require(script.Parent:WaitForChild("Types"))
 
+--[=[
+	@class Shared
+]=]
 local Shared = {
 	Prefix = "[Grid]",
 	IsStudio = RunService:IsStudio(),
@@ -139,7 +142,7 @@ end
 
 	@return any -- Returns what yield returned
 
--- TODO: Improve thread handling
+	-- TODO: Improve thread handling
 ]=]
 function Shared.YieldThread(): any
 	-- needed a way to first call coroutine.yield(), and then call YieldBindable.Event:Wait()
@@ -157,7 +160,7 @@ end
 
 	@param thread Thread -- The thread you want to resume
 	@param ... any -- What you want to return to the thread
--- TODO: Improve thread handling
+	-- TODO: Improve thread handling
 ]=]
 function Shared.ResumeThread(thread: thread, ...: any?)
 	coroutine.resume(thread, ...)
@@ -288,7 +291,7 @@ end
 
 	@param name string -- The name of the event handler.
 
-	@returns Types.EventHandler
+	@return Types.EventHandler
 
 	@yields
 ]=]
@@ -371,7 +374,7 @@ end
 
 	@param name string -- The name of the function handler.
 
-	@returns Types.FunctionHandler
+	@return Types.FunctionHandler
 
 	@yields
 ]=]
@@ -551,16 +554,12 @@ end
 	Combines handler with a callback and logs it if logging exists
 
 	@param handler Types.EventHandler
-	@param finalCallback: { (...any) -> () } | (...any) -> ()
+	@param finalCallback { (...any) -> () } | (...any) -> ()
 	@param ... any?
 
-	@returns (...any) -> ()
+	@return (...any) -> ()
 ]=]
-function Shared.CombineFunctions(
-	handler: Types.EventHandler,
-	finalCallback: { (...any) -> () } | (...any) -> (),
-	...: any?
-): (...any) -> ()
+function Shared.CombineFunctions(handler: Types.EventHandler, finalCallback: { (...any) -> () } | (...any) -> (),...: any?): (...any) -> ()
 	local middleware = { ... }
 	local callback: (...any) -> ()
 
