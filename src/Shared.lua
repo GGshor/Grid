@@ -283,14 +283,16 @@ function Shared.WaitForChild(parent: Instance, name: string): Instance
 	return found
 end
 
---[[
+--[=[
 	Searches for the event handler and makes one if it doesn't exists yet.
 
 	@param name string -- The name of the event handler.
 
+	@returns Types.EventHandler
+
 	@yields
-]]
-function Shared.GetEventHandler(name: string): {}
+]=]
+function Shared.GetEventHandler(name: string): Types.EventHandler
 	-- Prevents creating the same handler
 	local found = Shared.Handlers.Events[name]
 	if found then
@@ -364,12 +366,16 @@ function Shared.GetEventHandler(name: string): {}
 	return handler
 end
 
---[[
+--[=[
 	Searches for the function handler and makes one if it doesn't exists yet.
 
-	YIELDS
-]]
-function Shared.GetFunctionHandler(name: string): {}
+	@param name string -- The name of the function handler.
+
+	@returns Types.FunctionHandler
+
+	@yields
+]=]
+function Shared.GetFunctionHandler(name: string): Types.FunctionHandler
 	-- Prevents creating the same handler
 	local foundHandler = Shared.Handlers.Functions[name]
 	if foundHandler then
@@ -477,6 +483,12 @@ function Shared.ExecuteDeferredHandlers()
 	end
 end
 
+--[=[
+	Match parameters
+
+	@param event string -- The event
+	@param paramTypes {any} -- The types to check for
+]=]
 function Shared.MatchParams(event: string, paramTypes: { any })
 	paramTypes = { table.unpack(paramTypes) }
 	local paramStart = 1
@@ -535,14 +547,20 @@ function Shared.MatchParams(event: string, paramTypes: { any })
 	return MatchParams
 end
 
---[[
+--[=[
 	Combines handler with a callback and logs it if logging exists
-]]
+
+	@param handler Types.EventHandler
+	@param finalCallback: { (...any) -> () } | (...any) -> ()
+	@param ... any?
+
+	@returns (...any) -> ()
+]=]
 function Shared.CombineFunctions(
 	handler: Types.EventHandler,
 	finalCallback: { (...any) -> () } | (...any) -> (),
 	...: any?
-)
+): (...any) -> ()
 	local middleware = { ... }
 	local callback: (...any) -> ()
 

@@ -213,11 +213,14 @@ function Server:LogTrafficAsync(duration: number, shouldOutput: boolean)
 	end
 end
 
---[[
+--[=[
 	Binds callbacks to event
 
-	YIELDS
-]]
+	@param pre { [string]: () -> ()}?
+	@param callbacks { [string]: () -> ()}
+
+	@yields
+]=]
 function Server:BindEvents(pre: { [string]: () -> () }?, callbacks: { [string]: () -> () })
 	if typeof(pre) == "table" then
 		pre, callbacks = nil, pre
@@ -239,11 +242,14 @@ function Server:BindEvents(pre: { [string]: () -> () }?, callbacks: { [string]: 
 	Shared.ExecuteDeferredHandlers()
 end
 
---[[
+--[=[
 	Binds callbacks to function
 
-	YIELDS
-]]
+	@param pre { [string]: () -> ()}?
+	@param callbacks { [string]: () -> ()}
+
+	@yields
+]=]
 function Server:BindFunctions(pre: { [string]: () -> () }?, callbacks: { [string]: () -> () })
 	if typeof(pre) == "table" then
 		pre, callbacks = nil, pre

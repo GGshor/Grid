@@ -117,6 +117,14 @@ function Client:InvokeServer(event: string, ...): ...any
 	return self:InvokeServerWithTimeout(nil, event, ...)
 end
 
+--[=[
+	Binds callbacks to event
+
+	@param pre { [string]: () -> ()}?
+	@param callbacks { [string]: () -> ()}
+
+	@yields
+]=]
 function Client:BindEvents(pre: { [string]: () -> () }?, callbacks: { [string]: () -> () })
 	if typeof(pre) == "table" then
 		pre, callbacks = nil, pre
@@ -137,11 +145,14 @@ function Client:BindEvents(pre: { [string]: () -> () }?, callbacks: { [string]: 
 	Shared.ExecuteDeferredHandlers()
 end
 
---[[
+--[=[
 	Binds callbacks to function
 
-	YIELDS
-]]
+	@param pre { [string]: () -> ()}?
+	@param callbacks { [string]: () -> ()}
+
+	@yields
+]=]
 function Client:BindFunctions(pre: { [string]: () -> () }?, callbacks: { [string]: () -> () })
 	if typeof(pre) == "table" then
 		pre, callbacks = nil, pre
