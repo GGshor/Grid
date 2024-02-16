@@ -35,7 +35,7 @@ end
 function Server:FireClient(client: Player, event: string, ...: any)
 	local handler = Shared.GetEventHandler(event)
 	if not handler then
-		error(("[Grid]: '%s' is not a valid RemoteEvent"):format(event))
+		error(`[Grid]: '{event}' is not a valid RemoteEvent`)
 	end
 
 	HandlerFireClient(handler, client, ...)
@@ -47,7 +47,7 @@ end
 function Server:FireAllClients(event: string, ...)
 	local handler = Shared.GetEventHandler(event)
 	if not handler then
-		error(("[Grid]: '%s' is not a valid RemoteEvent"):format(event))
+		error(`[Grid]: '{event}' is not a valid RemoteEvent`)
 	end
 
 	for _, player: Player in pairs(self:GetPlayers()) do
@@ -61,7 +61,7 @@ end
 function Server:FireOtherClients(exceptClient: Player, event, ...)
 	local handler = Shared.GetEventHandler(event)
 	if not handler then
-		error(("[Grid]: '%s' is not a valid RemoteEvent"):format(event))
+		error(`[Grid]: '{event}' is not a valid RemoteEvent`)
 	end
 
 	for _, player: Player in pairs(self:GetPlayers()) do
@@ -79,7 +79,7 @@ end
 function Server:FireOtherClientsWithinDistance(client: Player, maxDistance: number, event: string, ...)
 	local handler = Shared.GetEventHandler(event)
 	if not handler then
-		error(("[Grid]: '%s' is not a valid RemoteEvent"):format(event))
+		error(`[Grid]: '{event}' is not a valid RemoteEvent`)
 	end
 
 	local clientPosition = self:GetPlayerPosition(client)
@@ -104,7 +104,7 @@ end
 function Server:FireAllClientsWithinDistance(position: Vector3, maxDistance: number, event: string, ...)
 	local handler = Shared.GetEventHandler(event)
 	if not handler then
-		error(("[Grid]: '%s' is not a valid RemoteEvent"):format(event))
+		error(`[Grid]: '{event}' is not a valid RemoteEvent`)
 	end
 
 	for _, player: Player in pairs(self:GetPlayers()) do
@@ -124,7 +124,7 @@ end
 function Server:InvokeClientWithTimeout(timeout: number, client: Player, event: string, ...): (boolean, any?)
 	local handler = Shared.GetEventHandler(event)
 	if not handler then
-		error(("[Grid]: '%s' is not a valid RemoteEvent"):format(event))
+		error(`[Grid]: '{event}' is not a valid RemoteEvent`)
 	end
 
 	return Shared.SafeInvoke(timeout, handler, client, ...)
@@ -181,19 +181,19 @@ function Server:LogTrafficAsync(duration: number, shouldOutput: boolean)
 			totalSent += #data.Out
 		end
 
-		output(string.format("Player '%s', total received/sent: %d/%d", player.Name, totalReceived, totalSent))
+		output(`Player '{player.Name}', total received/sent: {tostring(totalReceived)}/{totalSent}`)
 
 		for remote, data in pairs(remotes) do
 			-- Incoming
 
 			local listIn = data.In
 			if #listIn > 0 then
-				output(string.format("   %s %s: %d (%.2f/s)", "FireServer", remote.Name, #listIn, #listIn / effDur))
+				output(`   {remote.Name} {#listIn}: {tostring(#listIn)} ({effDur}.2f/s)", "FireServer"`)
 
 				local count = math.min(#listIn, 3)
 				for i = 1, count do
 					local index = math.floor(1 + (i - 1) / math.max(1, count - 1) * (#listIn - 1) + 0.5)
-					output(string.format("      %d: %s", index, listIn[index]))
+					output(`      {tostring(index)}: {listIn[index]}`)
 				end
 			end
 
@@ -201,16 +201,74 @@ function Server:LogTrafficAsync(duration: number, shouldOutput: boolean)
 
 			local listOut = data.Out
 			if #listOut > 0 then
-				output(string.format("   %s %s: %d (%.2f/s)", "FireClient", remote.Name, #listOut, #listOut / effDur))
+				output(`   {remote.Name} {#listOut}: {tostring(#listOut)} ({effDur}.2f/s)", "FireClient"`)
 
 				local count = math.min(#listOut, 3)
 				for i = 1, count do
 					local index = math.floor(1 + (i - 1) / math.max(1, count - 1) * (#listOut - 1) + 0.5)
-					output(string.format("      %d: %s", index, listOut[index]))
+					output(`      {tostring(index)}: {listOut[index]}`)
 				end
 			end
 		end
 	end
+end
+
+--[[
+	Binds callbacks to event
+
+	YIELDS
+]]
+function Server:BindEvents(pre: { [string]: () -> () }?, callbacks: { [string]: () -> () })
+	if typeof(pre) == "table" then
+		pre, callbacks = nil, pre
+	end
+
+	for name: string, callback: () -> () in pairs(callbacks) do
+		local handler = Shared.GetEventHandler(name)
+		if not handler then
+			error(("[Grid]: Tried to bind callback to non-existing RemoteEvent %q"):format(name))
+		end
+
+		handler.Callbacks[#handler.Callbacks + 1] = Shared.CombineFunctions(handler, callback, pre)
+
+		handler.Remote.OnServerEvent:Connect(function(...)
+			Shared.SafeFireEvent(handler, ...)
+		end)
+	end
+
+	Shared.ExecuteDeferredHandlers()
+end
+
+--[[
+	Binds callbacks to function
+
+	YIELDS
+]]
+function Server:BindFunctions(pre: { [string]: () -> () }?, callbacks: { [string]: () -> () })
+	if typeof(pre) == "table" then
+		pre, callbacks = nil, pre
+	end
+
+	for name: string, callback: () -> () in pairs(callbacks) do
+		local handler = Shared.GetFunctionHandler(name)
+		if not handler then
+			error(`[Grid]: Tried to bind callback to non-existing RemoteFunction {name}`)
+		end
+
+		if handler.Callback then
+			error(
+				`[Grid]: Tried to bind multiple callbacks to the same RemoteFunction ({handler.Remote:GetFullName()})`
+			)
+		end
+
+		handler.Callback = Shared.CombineFunctions(handler, callback, pre)
+
+		handler.Remote.OnServerInvoke = function(...)
+			return Shared.SafeInvokeCallback(handler, ...)
+		end
+	end
+
+	Shared.ExecuteDeferredHandlers()
 end
 
 return Server

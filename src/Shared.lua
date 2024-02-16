@@ -5,21 +5,21 @@ local RunService = game:GetService("RunService")
 local Types = require(script.Parent:WaitForChild("Types"))
 
 local Shared = {
-    Prefix = "[Grid]",
-    IsStudio = RunService:IsStudio(),
-    IsServer = RunService:IsServer(),
-    YieldBindable = Instance.new("BindableEvent"),
-    CreatedCommunications = false,
+	Prefix = "[Grid]",
+	IsStudio = RunService:IsStudio(),
+	IsServer = RunService:IsServer(),
+	YieldBindable = Instance.new("BindableEvent"),
+	CreatedCommunications = false,
 
 	Handlers = {
 		Events = {},
 		Functions = {},
 		Binds = {},
-		Deferred = {}
+		Deferred = {},
 	},
 	Counters = {
 		Received = 0,
-		Invoked = 0
+		Invoked = 0,
 	},
 
 	LoggingActive = false,
@@ -33,9 +33,8 @@ local Shared = {
 			})
 			return logTable[index]
 		end,
-	})
+	}),
 }
-
 
 --[=[
 	Adds the prefix to print
@@ -71,20 +70,19 @@ function Shared.GetParametersString(...: any): string
 		local valueType = typeof(packed[index])
 
 		if valueType == "string" then
-			packed[index] = string.format("%q[%d]", #value <= 18 and value or value:sub(1, 15) .. "...", #value)
+			packed[index] = `{tostring(#value <= 18 and value or value:sub(1, 15)) .. "..."}[{tostring(#value)}]`
 		elseif valueType == "Instance" then
 			local success, className = pcall(function()
 				return value.ClassName
 			end)
 
-			packed[index] = success and string.format("%s<%s>", valueType, className) or valueType
+			packed[index] = success and `{valueType}<{className}>` or valueType
 		else
 			packed[index] = valueType
 		end
 	end
 
-	return table.concat(packed, ", ", 1, minimum)
-		.. (packed.n > minimum and string.format(", ... (%d more)", packed.n - minimum) or "")
+	return table.concat(packed, ", ", 1, minimum) .. (packed.n > minimum and `, .. ({packed.n - minimum} more)` or "")
 end
 
 --[=[
@@ -479,7 +477,7 @@ function Shared.ExecuteDeferredHandlers()
 	end
 end
 
-function Shared.MatchParams(event: string, paramTypes: {any})
+function Shared.MatchParams(event: string, paramTypes: { any })
 	paramTypes = { table.unpack(paramTypes) }
 	local paramStart = 1
 
@@ -524,12 +522,7 @@ function Shared.MatchParams(event: string, paramTypes: {any})
 			if not argExpected[argType:lower()] and not argExpected.any then
 				if Shared.IsStudio then
 					Shared.DebugWarn(
-						("Invalid parameter %d to %s (%s expected, got %s)"):format(
-							i - paramStart + 1,
-							event,
-							argExpected._string,
-							argType
-						)
+						`Invalid parameter {tostring(i - paramStart + 1)} to {event} ({argExpected._string} got {argType})`
 					)
 				end
 				return
@@ -545,7 +538,11 @@ end
 --[[
 	Combines handler with a callback and logs it if logging exists
 ]]
-function Shared.CombineFunctions(handler: Types.EventHandler, finalCallback: { (...any) -> () } | (...any) -> (), ...: any?)
+function Shared.CombineFunctions(
+	handler: Types.EventHandler,
+	finalCallback: { (...any) -> () } | (...any) -> (),
+	...: any?
+)
 	local middleware = { ... }
 	local callback: (...any) -> ()
 
