@@ -229,7 +229,7 @@ function Server:BindEvents(pre: { [string]: () -> () }?, callbacks: { [string]: 
 	for name: string, callback: () -> () in pairs(callbacks) do
 		local handler = Shared.GetEventHandler(name)
 		if not handler then
-			error(("[Grid]: Tried to bind callback to non-existing RemoteEvent %q"):format(name))
+			error(`[Grid]: Tried to bind callback to non-existing RemoteEvent {name}`)
 		end
 
 		handler.Callbacks[#handler.Callbacks + 1] = Shared.CombineFunctions(handler, callback, pre)
