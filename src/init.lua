@@ -44,7 +44,7 @@
 local RunService = game:GetService("RunService")
 
 if RunService:IsServer() then
-	return script:WaitForChild("Server")
+	return require(script:WaitForChild("Server"))
 else
-	return script:WaitForChild("Client")
+	return require(script:WaitForChild("Client"))
 end
