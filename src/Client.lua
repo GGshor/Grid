@@ -74,7 +74,7 @@ end
 function Client:FireServer(event: string, ...)
 	local handler = Shared.GetEventHandler(event)
 	if not handler then
-		error(`[Grid]: '{event}' is not a valid RemoteEvent`)
+		error(`{Shared.Prefix} '{event}' is not a valid RemoteEvent`)
 	end
 
 	if handler.Remote then
@@ -96,7 +96,7 @@ end
 function Client:InvokeServerWithTimeout(timeout: number, event: string, ...): ...any
 	local handler = Shared.GetFunctionHandler(event)
 	if not handler then
-		error(`[Grid]: '{event}' is not a valid RemoteFunction"`)
+		error(`{Shared.Prefix} '{event}' is not a valid RemoteFunction"`)
 	end
 
 	if not handler.Remote then
@@ -113,7 +113,7 @@ function Client:InvokeServerWithTimeout(timeout: number, event: string, ...): ..
 	end
 
 	local result = table.pack(Shared.SafeInvoke(timeout, handler, ...))
-	assert(result[1] == true, "InvokeServer error")
+	assert(result[1] == true, `{Shared.Prefix} InvokeServer error`)
 
 	return unpack(result, 2)
 end
@@ -141,7 +141,7 @@ function Client:BindEvents(pre: { [string]: () -> () }?, callbacks: { [string]: 
 	for name: string, callback: () -> () in pairs(callbacks) do
 		local handler = Shared.GetEventHandler(name)
 		if not handler then
-			error(`[Grid]: Tried to bind callback to non-existing RemoteEvent {name}`)
+			error(`{Shared.Prefix} Tried to bind callback to non-existing RemoteEvent {name}`)
 		end
 
 		handler.Callbacks[#handler.Callbacks + 1] = Shared.CombineFunctions(handler, callback, pre)
@@ -169,12 +169,12 @@ function Client:BindFunctions(pre: { [string]: () -> () }?, callbacks: { [string
 	for name: string, callback: () -> () in pairs(callbacks) do
 		local handler = Shared.GetFunctionHandler(name)
 		if not handler then
-			error(`[Grid]: Tried to bind callback to non-existing RemoteFunction {name}`)
+			error(`{Shared.Prefix} Tried to bind callback to non-existing RemoteFunction {name}`)
 		end
 
 		if handler.Callback then
 			error(
-				`[Grid]: Tried to bind multiple callbacks to the same RemoteFunction ({handler.Remote:GetFullName()})`
+				`{Shared.Prefix} Tried to bind multiple callbacks to the same RemoteFunction ({handler.Remote:GetFullName()})`
 			)
 		end
 
