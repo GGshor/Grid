@@ -6,6 +6,8 @@ local Types = require(script.Parent:WaitForChild("Types"))
 
 --[=[
 	@class Shared
+
+	This class is meant only for functions that are called by the Server or Client class.
 ]=]
 local Shared = {
 	Prefix = "[Grid]",

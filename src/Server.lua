@@ -1,19 +1,25 @@
---[[
-    Server side of Grid
-]]
-
 local Players = game:GetService("Players")
 
+local Types = require(script.Parent.Types)
 local Shared = require(script.Parent:WaitForChild("Shared"))
 
 --[=[
 	@class Server
 
+	Server side of grid
+
 	@server
 ]=]
 local Server = {}
 
-function HandlerFireClient(handler, client, ...)
+--[=[
+	Logs and fires remote
+
+	@param handler Types.EventHandler -- The event handler
+	@param client Player -- The player you wish to fire to
+	@param 
+]=]
+function HandlerFireClient(handler: Types.EventHandler, client: Player, ...: any)
 	if Shared.LoggingActive then
 		table.insert(Shared.Logs[client][handler.Remote].Out, Shared.GetParametersString(...))
 	end
