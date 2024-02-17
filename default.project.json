@@ -1,6 +1,23 @@
 {
-  "name": "Grid",
+  "name": "Grid Testing",
   "tree": {
-    "$path": "src"
+      "$className": "DataModel",
+      "ReplicatedStorage": {
+          "$className": "ReplicatedStorage",
+          "Grid": {
+              "$path": "./src"
+          }
+      },
+      "StarterPlayer": {
+          "$className": "StarterPlayer",
+          "StarterPlayerScripts": {
+              "$className": "StarterPlayerScripts",
+              "$path": "./test/Client"
+          }
+      },
+      "ServerScriptService": {
+          "$className": "ServerScriptService",
+          "$path": "./test/Server"
+      }
   }
 }
